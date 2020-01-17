@@ -12,9 +12,11 @@ class AlienInvasion:
         """Initialize the game, and create game resources."""
         pygame.init()
         self.settings = Settings()
+        #self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height))
         self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
         self.settings.screen_width = self.screen.get_rect().width
         self.settings.screen_height = self.screen.get_rect().height
+
         pygame.display.set_caption("Alien Invasion")
 
         self.ship = Ship(self)
@@ -25,19 +27,23 @@ class AlienInvasion:
         while True:
             self._check_events()
             self.ship.update()
-            self.bullets.update()
-
-            #Get rid of bullets that are no longer visible
-            for bullet in self.bullets.copy():
-                if bullet.rect.bottom <= 0:
-                    self.bullets.remove(bullet)
-            print(len(self.bullets))
+            self._update_bullets()
             self._update_screen()
 
+    def _update_bullets(self):
+        """Update bullet positions and test if more bullets are allowed
+        """
+        self.bullets.update()
+        # Get rid of bullets that are no longer visible
+        for bullet in self.bullets.copy():
+            if bullet.rect.bottom <= 0:
+                self.bullets.remove(bullet)
+
     def _fire_bullet(self):
-        """Create a new bubllet and add it to the bullets group"""
-        new_bullet = Bullet(self)
-        self.bullets.add(new_bullet)
+        """Create a new bullet and add it to the bullets group"""
+        if len(self.bullets) < self.settings.bullets_allowed:
+            new_bullet = Bullet(self)
+            self.bullets.add(new_bullet)
 
     def _check_events(self):
         """Respond to keypresses and mouse events"""
