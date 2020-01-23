@@ -6,6 +6,7 @@ import pygame
 from settings import Settings
 from ship import Ship
 from bullet import Bullet
+from torpedo import Torpedo
 from alien import Alien
 from game_stats import GameStats
 from scoreboard import Scoreboard
@@ -35,6 +36,7 @@ class AlienInvasion:
         # Initialize sprites
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
+        self.torpedos = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
         self._create_fleet()
 
@@ -107,6 +109,8 @@ class AlienInvasion:
             self.ship.moving_left = True
         elif event.key == pygame.K_SPACE:
             self._fire_bullet()
+        elif event.key == pygame.K_t:
+            self._fire_torpedo()
         elif event.key == pygame.K_q:
             sys.exit()
 
@@ -116,36 +120,59 @@ class AlienInvasion:
             new_bullet = Bullet(self)
             self.bullets.add(new_bullet)
 
+    def _fire_torpedo(self):
+        """Create a new bullet and add it to the bullets group"""
+        if len(self.torpedos) < self.settings.torpedos_allowed:
+            new_torpedo = Torpedo(self)
+            self.torpedos.add(new_torpedo)
+
     def _update_bullets(self):
         """Update bullet positions and test if more bullets are allowed
         """
         self.bullets.update()
+        self.torpedos.update()
+
         # Get rid of bullets that are no longer visible
         for bullet in self.bullets.copy():
             if bullet.rect.bottom <= 0:
                 self.bullets.remove(bullet)
+
+        for torpedo in self.torpedos.copy():
+            if torpedo.rect.bottom <= 0:
+                self.torpedos.remove(torpedo)
+
         self._check_bullet_alien_collisions()
 
     def _check_bullet_alien_collisions(self):
         """"Detect bullet-alien collisions and remove both if collided"""
 
-        collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
+        collisions_bullet = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
+        collisions_torpedo = pygame.sprite.groupcollide(self.torpedos, self.aliens, False, True)
 
-        if collisions:
-            for list_of_hit_aliens in collisions.values():
-                self.stats.score += self.settings.alien_points * len(list_of_hit_aliens)
-                self.sb.prep_score()
-                self.sb.check_high_score()
+
+        if collisions_bullet:
+            for list_of_hit_aliens in collisions_bullet.values():
+                self._update_score(list_of_hit_aliens)
+
+        if collisions_torpedo:
+            for list_of_hit_aliens in collisions_torpedo.values():
+                self._update_score(list_of_hit_aliens)
 
         if not self.aliens:  # if all aliens have been destroyed
             # Get rid of existing bullets and generate new fleet
             self.bullets.empty()
+            self.torpedos.empty()
             self._create_fleet()
             self.settings.increase_speed()
 
             # Increase level
             self.stats.level += 1
             self.sb.prep_level()
+
+    def _update_score(self, list_of_hit_aliens):
+        self.stats.score += self.settings.alien_points * len(list_of_hit_aliens)
+        self.sb.prep_score()
+        self.sb.check_high_score()
 
     def _create_alien(self, alien_number, row_number):
         # Create an alien and place it in the row
@@ -232,6 +259,8 @@ class AlienInvasion:
         self.ship.blitme()
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
+        for torpedo in self.torpedos.sprites():
+            torpedo.blitme()
         self.aliens.draw(self.screen)
 
         #Draw scoreboard
