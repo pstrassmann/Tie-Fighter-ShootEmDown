@@ -1,16 +1,18 @@
 import pygame
+from pygame.sprite import Sprite
 
-class Ship:
+class Ship(Sprite):
     """A class to manage the ship"""
     def __init__(self, ai_game):
         """Initialize the ship and set its starting position"""
+        super().__init__()
         self.ai_game = ai_game
         self.screen = ai_game.screen
         self.screen_rect = ai_game.screen.get_rect()
         self.settings = ai_game.settings
 
         # Load the ship image and get its rect
-        self.image = pygame.image.load('images/ship.bmp')
+        self.image = pygame.image.load('images/poe.png')
         self.rect = self.image.get_rect() # P| gets the rectangle of the ship image
         # Start each new ship at the bottom center of the screen.
         self.rect.midbottom = self.screen_rect.midbottom # P| Lines the ship's rect to the screen's rect

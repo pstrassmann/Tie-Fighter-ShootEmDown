@@ -13,7 +13,13 @@ class Bullet(Sprite):
         # Create a bullet rect at (0, 0) and then set correct position.
         self.rect = pygame.Rect(0, 0, self.settings.bullet_width,
             self.settings.bullet_height)
-        self.rect.midtop = ai_game.ship.rect.midtop
+
+        if self.settings.last_fired_on_right:
+            self.rect.midtop = ai_game.ship.rect.midleft
+            self.settings.last_fired_on_right = False
+        else:
+            self.rect.midtop = ai_game.ship.rect.midright
+            self.settings.last_fired_on_right = True
 
         # Store the bullet's position as a decimal value.
         self.y = float(self.rect.y)
