@@ -26,7 +26,7 @@ class AlienInvasion:
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.settings.screen_width = self.screen.get_rect().width
         self.settings.screen_height = self.screen.get_rect().height
-        pygame.display.set_caption("Alien Invasion")
+        pygame.display.set_caption("Tie Fighter ShootEmDown")
         # self.clock = pygame.time.Clock()
 
         # Initialize game statistics and scoreboard
